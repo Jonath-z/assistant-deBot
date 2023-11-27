@@ -1,0 +1,6 @@
+service: () -> {
+    addMessageToConversation: (record {userIdentity:text; conversationId:text; message:record {content:text; role:text}}) -> (variant {Ok:record {id:text; content:text; role:text}; Err:variant {message:text}});
+    createConversation: (variant {userIdentity:text}) -> (variant {Ok:record {id:text; initiator:text; conversation:record {id:text; conversation:vec record {id:text; content:text; role:text}}}; Err:variant {message:text}});
+    deleteConversation: (text) -> (variant {Ok:text; Err:variant {message:text}});
+    getConversation: (text) -> (variant {Ok:record {id:text; conversation:vec record {id:text; content:text; role:text}}; Err:variant {message:text}}) query;
+}

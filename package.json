@@ -1,0 +1,79 @@
+{
+  "name": "dfinity_js_frontend",
+  "version": "0.2.0",
+  "description": "Internet Computer starter application",
+  "keywords": [
+    "Internet Computer",
+    "Motoko",
+    "JavaScript",
+    "Canister"
+  ],
+  "scripts": {
+    "build": "webpack",
+    "prebuild": "dfx generate",
+    "start": "webpack serve --mode development --env development",
+    "deploy:local": "dfx deploy --network=local",
+    "deploy:ic": "dfx deploy --network=ic",
+    "generate": "dfx generate dfinity_js_backend",
+    "gen-deploy:local": "dfx generate dfinity_js_backend && dfx deploy --network=local"
+  },
+  "dependencies": {
+    "@dfinity/agent": "^0.19.2",
+    "@dfinity/auth-client": "^0.19.3",
+    "@dfinity/candid": "^0.19.2",
+    "@dfinity/ledger": "^0.0.15",
+    "@dfinity/nns": "^0.16.7",
+    "@dfinity/principal": "^0.19.2",
+    "@dfinity/utils": "^0.0.22",
+    "@popperjs/core": "^2.10.2",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "azle": "^0.18.6",
+    "big-number": "^2.0.0",
+    "bootstrap": "^5.1.3",
+    "bootstrap-icons": "^1.7.1",
+    "hashcode": "^1.0.3",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.2",
+    "react-bootstrap": "^2.0.3",
+    "react-confirm-alert": "^2.7.0",
+    "react-dom": "^17.0.2",
+    "react-hot-toast": "^2.4.1",
+    "react-toastify": "^8.1.0",
+    "secp256k1": "^5.0.0",
+    "uuid": "^9.0.0",
+    "web-vitals": "^1.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.8",
+    "@babel/preset-env": "^7.21.5",
+    "@babel/preset-react": "^7.18.6",
+    "assert": "2.0.0",
+    "babel-loader": "^8.0.0",
+    "buffer": "6.0.3",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.3",
+    "dotenv": "^16.0.3",
+    "events": "3.3.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "5.5.0",
+    "process": "0.11.10",
+    "stream-browserify": "3.0.0",
+    "style-loader": "^3.3.2",
+    "terser-webpack-plugin": "^5.3.3",
+    "util": "0.12.4",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.8.1"
+  },
+  "engines": {
+    "node": "^12 || ^14 || ^16 || ^18"
+  },
+  "browserslist": [
+    "last 2 chrome version",
+    "last 2 firefox version",
+    "last 2 safari version",
+    "last 2 edge version"
+  ]
+}
