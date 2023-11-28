@@ -27,3 +27,4 @@ ledger-canister.wasm
 .env
 node_modules
 credential.js
+credential.ts

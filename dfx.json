@@ -12,7 +12,8 @@
       "candid": "src/dfinity_js_backend/src/index.did",
       "build": "npx azle dfinity_js_backend",
       "wasm": ".azle/dfinity_js_backend/dfinity_js_backend.wasm",
-      "gzip": true
+      "gzip": true,
+      "env": ["OPEN_AI_API_KEY"]
     },
     "dfinity_js_frontend": {
       "dependencies": ["dfinity_js_backend"],

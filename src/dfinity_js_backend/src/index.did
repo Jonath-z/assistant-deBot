@@ -1,6 +1,8 @@
 service: () -> {
     addMessageToConversation: (record {userIdentity:text; conversationId:text; message:record {content:text; role:text}}) -> (variant {Ok:record {id:text; content:text; role:text}; Err:variant {message:text}});
-    createConversation: (variant {userIdentity:text}) -> (variant {Ok:record {id:text; initiator:text; conversation:record {id:text; conversation:vec record {id:text; content:text; role:text}}}; Err:variant {message:text}});
+    createAssistant: (record {model:text; tools:vec text; name:text; description:opt text; instructions:text}) -> (variant {Ok:record {id:text; model:text; tools:vec text; object:text; metadata:record {}; name:text; description:text; created_at:int64; instructions:text; file_ids:vec text}; Err:text});
+    createConversation: (variant {userIdentity:text}) -> (variant {Ok:record {id:text; initiator:text; conversation:record {id:text; conversation:vec record {id:text; content:text; role:text}}}; Err:variant {message:text}}) query;
     deleteConversation: (text) -> (variant {Ok:text; Err:variant {message:text}});
     getConversation: (text) -> (variant {Ok:record {id:text; conversation:vec record {id:text; content:text; role:text}}; Err:variant {message:text}}) query;
+    transform: (record {context:vec nat8; response:record {status:nat; body:vec nat8; headers:vec record {value:text; name:text}}}) -> (record {status:nat; body:vec nat8; headers:vec record {value:text; name:text}}) query;
 }
