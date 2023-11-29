@@ -14,6 +14,8 @@ import {
   Principal,
   StableBTreeMap,
   nat16,
+  None,
+  Null,
 } from "azle";
 import { OPEN_AI_API_KEY } from "./credential";
 
@@ -32,7 +34,7 @@ const CreateAssistantResponseBody = Record({
   object: text,
   created_at: int64,
   name: text,
-  description: text,
+  description: Null || Opt(text),
   model: text,
   instructions: text,
   tools: Vec(text),
@@ -46,14 +48,37 @@ const ErrorResponse = Record({
   }),
 });
 
-const assistantStorage = StableBTreeMap(text, CreateAssistantResponseBody, 1);
+const assistantStorage = StableBTreeMap(
+  text,
+  Vec(CreateAssistantResponseBody),
+  1
+);
 
 class Assistant {
   private saveUserAssistant(
     userIdentity: text,
     assistant: typeof CreateAssistantResponseBody
   ) {
-    assistantStorage.insert(userIdentity, assistant);
+    const userAssistants = assistantStorage.get(userIdentity);
+    console.log(userAssistants);
+    if ("None" in userAssistants) {
+      const updtedAssistant = [assistant];
+      console.log(updtedAssistant);
+      assistantStorage.insert(userIdentity, updtedAssistant);
+    } else {
+      const assistantIndex = userAssistants.findIndex(
+        (assistant: typeof CreateAssistantResponseBody) =>
+          assistant.id === assistant.id
+      );
+      if (assistantIndex !== -1) {
+        userAssistants[assistantIndex] = assistant;
+        assistantStorage.insert(userIdentity, userAssistants);
+      } else {
+        const updtedAssistant = [...userAssistants, assistant];
+        console.log(updtedAssistant);
+        assistantStorage.insert(userIdentity, updtedAssistant);
+      }
+    }
   }
 
   private fromatCreateAssistantResponse(
@@ -71,17 +96,19 @@ class Assistant {
     };
   }
 
-  createAssistant() {
+  /**
+   * save user assistant function
+   * @date 11/29/2023 - 11:38:18 AM
+   *
+   * @param {string} assistantId
+   * @param {string} userIdentity
+   * @returns {*}
+   */
+  saveAssistant() {
     return update(
-      [CreatAssiatantPayload, text],
+      [text, text],
       Result(CreateAssistantResponseBody, text),
-      async (payload, userIdentity) => {
-        const fomattedPayload = {
-          ...payload,
-          tools: payload.tools.map((tool) => ({ type: tool })),
-          description: payload.description?.Some ?? "",
-        };
-
+      async (assistantId, userIdentity) => {
         const response = await ic.call(managementCanister.http_request, {
           args: [
             {
@@ -89,12 +116,12 @@ class Assistant {
                 function: [ic.id(), "transform"] as [Principal, string],
                 context: Uint8Array.from([]),
               }),
-              url: ASSISTANT_ENDPOINT,
+              url: `${ASSISTANT_ENDPOINT}/${assistantId}`,
               max_response_bytes: Some(2_000n),
               method: {
-                post: null,
+                get: null,
               },
-              body: Some(Buffer.from(JSON.stringify(fomattedPayload), "utf-8")),
+              body: None,
               headers: [
                 {
                   name: "OpenAI-Beta",
@@ -120,6 +147,9 @@ class Assistant {
         );
 
         if (Number(response.status) !== 200) {
+          console.log(
+            (formattedResponse as unknown as typeof ErrorResponse).error.message
+          );
           return Err(
             (formattedResponse as unknown as typeof ErrorResponse).error.message
           );

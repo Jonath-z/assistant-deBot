@@ -54,7 +54,7 @@ const ErrorMessage = Variant({ message: text });
 const userConversation = StableBTreeMap(text, Conversation, 0);
 
 export default Canister({
-  createAssistant: assistant.createAssistant(),
+  saveAssistant: assistant.saveAssistant(),
   transform: query([HttpTransformArgs], HttpResponse, (args) => {
     return {
       ...args.response,
