@@ -13,9 +13,8 @@ import {
 } from "azle";
 import { v4 as uuidv4 } from "uuid";
 import { systemMessage } from "./utils/ai";
-import { createAssistant } from "./utils/assistant";
 import { HttpResponse, HttpTransformArgs } from "azle/canisters/management";
-// import Openai from "openai";
+import assistant from "./utils/assistant";
 
 /**
  * Message record
@@ -55,7 +54,7 @@ const ErrorMessage = Variant({ message: text });
 const userConversation = StableBTreeMap(text, Conversation, 0);
 
 export default Canister({
-  createAssistant: createAssistant().call,
+  createAssistant: assistant.createAssistant(),
   transform: query([HttpTransformArgs], HttpResponse, (args) => {
     return {
       ...args.response,
