@@ -2,51 +2,22 @@ import { managementCanister } from "azle/canisters/management";
 import {
   update,
   text,
-  Record,
-  Opt,
   ic,
   Vec,
   Ok,
   Err,
   Result,
-  int64,
   Some,
   Principal,
   StableBTreeMap,
   nat16,
   None,
-  Null,
+  query,
 } from "azle";
-import { OPEN_AI_API_KEY } from "./credential";
-
-export const ASSISTANT_ENDPOINT = "https://api.openai.com/v1/assistants";
-
-const CreatAssiatantPayload = Record({
-  model: text,
-  name: text,
-  description: Opt(text),
-  instructions: text,
-  tools: Vec(text),
-});
-
-const CreateAssistantResponseBody = Record({
-  id: text,
-  object: text,
-  created_at: int64,
-  name: text,
-  description: Null || Opt(text),
-  model: text,
-  instructions: text,
-  tools: Vec(text),
-  file_ids: Vec(text),
-  metadata: Record({}),
-});
-
-const ErrorResponse = Record({
-  error: Record({
-    message: text,
-  }),
-});
+import { ErrorResponse } from "./models/error";
+import { ASSISTANT_ENDPOINT } from "./utils/constants";
+import { CreateAssistantResponseBody } from "./models/assistant";
+import { OPEN_AI_API_KEY } from "../../../credential";
 
 const assistantStorage = StableBTreeMap(
   text,
@@ -59,26 +30,7 @@ class Assistant {
     userIdentity: text,
     assistant: typeof CreateAssistantResponseBody
   ) {
-    const userAssistants = assistantStorage.get(userIdentity);
-    console.log(userAssistants);
-    if ("None" in userAssistants) {
-      const updtedAssistant = [assistant];
-      console.log(updtedAssistant);
-      assistantStorage.insert(userIdentity, updtedAssistant);
-    } else {
-      const assistantIndex = userAssistants.findIndex(
-        (assistant: typeof CreateAssistantResponseBody) =>
-          assistant.id === assistant.id
-      );
-      if (assistantIndex !== -1) {
-        userAssistants[assistantIndex] = assistant;
-        assistantStorage.insert(userIdentity, userAssistants);
-      } else {
-        const updtedAssistant = [...userAssistants, assistant];
-        console.log(updtedAssistant);
-        assistantStorage.insert(userIdentity, updtedAssistant);
-      }
-    }
+    assistantStorage.insert(userIdentity, [assistant]);
   }
 
   private fromatCreateAssistantResponse(
@@ -107,7 +59,7 @@ class Assistant {
   saveAssistant() {
     return update(
       [text, text],
-      Result(CreateAssistantResponseBody, text),
+      Result(CreateAssistantResponseBody, ErrorResponse),
       async (assistantId, userIdentity) => {
         const response = await ic.call(managementCanister.http_request, {
           args: [
@@ -116,7 +68,7 @@ class Assistant {
                 function: [ic.id(), "transform"] as [Principal, string],
                 context: Uint8Array.from([]),
               }),
-              url: `${ASSISTANT_ENDPOINT}/${assistantId}`,
+              url: `${ASSISTANT_ENDPOINT}/${assistantId.trim()}`,
               max_response_bytes: Some(2_000n),
               method: {
                 get: null,
@@ -147,16 +99,35 @@ class Assistant {
         );
 
         if (Number(response.status) !== 200) {
-          console.log(
-            (formattedResponse as unknown as typeof ErrorResponse).error.message
-          );
-          return Err(
-            (formattedResponse as unknown as typeof ErrorResponse).error.message
-          );
+          return Err({
+            error: {
+              message: (formattedResponse as unknown as typeof ErrorResponse)
+                .error.message,
+            },
+          });
         }
 
         this.saveUserAssistant(userIdentity, formattedResponse);
         return Ok(formattedResponse);
+      }
+    );
+  }
+
+  getUserAssistants() {
+    return query(
+      [text],
+      Result(Vec(CreateAssistantResponseBody), ErrorResponse),
+      async (userIdentity) => {
+        if (!userIdentity) {
+          return Err({ error: { message: "userIdentity can not be empty" } });
+        }
+        const assistants = assistantStorage.get(userIdentity);
+        if ("None" in assistants) {
+          return Err({
+            error: { message: `No assistant found for ${userIdentity}` },
+          });
+        }
+        return Ok(assistants.Some);
       }
     );
   }
