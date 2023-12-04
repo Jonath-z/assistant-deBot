@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
-import { OPEN_AI_API_KEY } from "../utils/credential";
 import toast from "react-hot-toast";
-import { addMessageToConversation } from "../utils/chat";
+import { OPEN_AI_API_KEY } from "../../../../credential";
 
 const useApi = () => {
   const [data, setData] = useState("");
@@ -11,10 +10,10 @@ const useApi = () => {
   const [uploading, setUploading] = useState(false);
 
   const chatCompletion = useCallback(async (payload) => {
+    console.log(OPEN_AI_API_KEY);
     const url = "https://api.openai.com/v1/chat/completions";
     setLoading(true);
     try {
-      await addMessageToConversation(payload.at(-1));
       const response = await fetch(url, {
         method: "POST",
         headers: {
@@ -45,7 +44,7 @@ const useApi = () => {
         role: "assistant",
       };
       setChatMessage((prev) => [...prev, messageToSaveFromAssistant]);
-      await addMessageToConversation(messageToSaveFromAssistant);
+
       setData(assistantContent);
       setError(null);
       setLoading(false);

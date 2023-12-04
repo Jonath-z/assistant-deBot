@@ -4,7 +4,7 @@ import Loading from "./Loading";
 import { useEffect } from "react";
 import { login, logout } from "../utils/auth";
 import toast from "react-hot-toast";
-import { getConversation } from "../utils/chat";
+import SaveAssistant from "./SaveAssistant";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");
@@ -12,10 +12,6 @@ export default function Chat() {
 
   const updateChatMessage = async () => {
     if (window.auth.principalText && window.auth.isAuthenticated) {
-      const conversation = await getConversation(window.auth.principalText);
-      if (conversation.Ok) {
-        setChatMessage(conversation.Ok.conversation);
-      }
     }
   };
 
@@ -39,6 +35,7 @@ export default function Chat() {
 
   return (
     <div className="wrapper">
+      <SaveAssistant />
       <div className="wrapper-header">
         <h1>Dai</h1>
         <button
