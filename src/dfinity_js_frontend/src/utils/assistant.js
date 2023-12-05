@@ -28,7 +28,7 @@ export const getMyAssistant = async (userIdentity) => {
 
     return data.Ok;
   } catch (error) {
-    console.error(error);
+    console.log(error);
     toast.error(error.message || error.error.message);
   }
 };
@@ -46,7 +46,7 @@ export const updateUsername = async (username, userIdentity) => {
     console.log(data.Ok);
     return data.Ok;
   } catch (error) {
-    console.error(error);
+    console.log(error);
     toast.error(error.message || error.error.message);
   }
 };
@@ -61,14 +61,13 @@ export const getUsername = async (userIdentity) => {
     console.log(data.Ok);
     return data.Ok;
   } catch (error) {
-    console.error(error);
+    console.log(error);
     toast.error(error.message || error.error.message);
   }
 };
 
 export const saveThread = async (userIdentity, assistantId) => {
   try {
-    console.log({ userIdentity, assistantId });
     const data = await window.canister.assistant.saveThread(
       userIdentity,
       assistantId
@@ -93,7 +92,7 @@ export const getThread = async (userIdentity) => {
 
     return data.Ok;
   } catch (error) {
-    console.error(error);
+    console.log(error);
     toast.error(error.message || error.error.message);
   }
 };

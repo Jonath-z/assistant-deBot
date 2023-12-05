@@ -34,6 +34,7 @@
     "bootstrap": "^5.1.3",
     "bootstrap-icons": "^1.7.1",
     "hashcode": "^1.0.3",
+    "openai": "^4.20.1",
     "prop-types": "^15.7.2",
     "react": "^17.0.2",
     "react-bootstrap": "^2.0.3",

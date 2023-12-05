@@ -1,40 +1,72 @@
 import React, { useState } from "react";
-import useApi from "../hooks/useApi";
+// import useApi from "../hooks/useApi";
 import Loading from "./Loading";
 import { useEffect } from "react";
 import { login, logout } from "../utils/auth";
 import toast from "react-hot-toast";
 import SaveAssistant from "./SaveAssistant";
 import { useAssistant } from "../context/assistantProvider";
+import {
+  analyseRunsStepsDone,
+  createMessage,
+  getAllThreadMessages,
+  runTheAssistantOnTheThread,
+} from "../utils/chat";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");
-  const { loading, chatCompletion, chatMessage, setChatMessage } = useApi();
+  // const { loading, chatCompletion, chatMessage, setChatMessage } = useApi();
+  const [chatMessage, setChatMessage] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [assistantModalOpened, setAssistantIdModalOpened] = useState(false);
-  const { assistant } = useAssistant();
+  const { assistant, thread } = useAssistant();
 
   const updateChatMessage = async () => {
-    if (window.auth.principalText && window.auth.isAuthenticated) {
+    if (
+      window.auth.principalText &&
+      window.auth.isAuthenticated &&
+      thread?.id
+    ) {
+      const messages = await getAllThreadMessages(thread.id);
+      setChatMessage(messages);
     }
   };
 
   const handleSubmit = async (event) => {
+    event.preventDefault();
     if (!window.auth.isAuthenticated) {
       toast.error("You are not authenticated");
       return;
     }
 
-    if (question) {
-      const history = [...chatMessage, { content: question, role: "user" }];
-      setChatMessage(() => [...history]);
-      await chatCompletion(history);
-      setQuestion("");
+    if (!assistant?.id) {
+      toast.error("You need to add an assistant first");
+      return;
+    }
+
+    if (!thread?.id || !assistant?.id) {
+      console.log("Cannot create a message without a thread or an assistant");
+      return;
+    }
+
+    if (!question) return;
+
+    const messageToSend = { content: question, role: "user" };
+    setChatMessage((prev) => [...prev, messageToSend].reverse());
+    setLoading(true);
+    await createMessage(thread.id, messageToSend);
+    setQuestion("");
+    const runId = await runTheAssistantOnTheThread(thread.id, assistant.id);
+    const done = await analyseRunsStepsDone(thread.id, runId);
+    if (done) {
+      await updateChatMessage();
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     updateChatMessage();
-  }, []);
+  }, [window.auth.principalText, window.auth.isAuthenticated, thread?.id]);
 
   return (
     <div className="wrapper">
@@ -64,21 +96,23 @@ export default function Chat() {
         <div className="right">
           <div className="chat active-chat">
             <div className="conversation-start"></div>
-            {chatMessage.map((message, index) => (
-              <div
-                key={index}
-                className={`bubble ${
-                  message.role === "user" ? "me" : "assistant"
-                } ${
-                  chatMessage.length - 1 === index && !loading
-                    ? "last-message"
-                    : ""
-                }
+            {chatMessage
+              .map((message, index) => (
+                <div
+                  key={index}
+                  className={`bubble ${
+                    message.role === "user" ? "me" : "assistant"
+                  } ${
+                    chatMessage.length - 1 === index && !loading
+                      ? "last-message"
+                      : ""
+                  }
                 `}
-              >
-                {message.content}
-              </div>
-            ))}
+                >
+                  {message.content}
+                </div>
+              ))
+              .reverse()}
 
             {loading && (
               <div className={`bubble assistant`}>
