@@ -8,7 +8,16 @@ export default Canister({
   getUserAssistants: assistant.getUserAssistants(),
   updateUsername: user.updateUsername(),
   getUsername: user.getUsername(),
+  saveThread: assistant.saveThread(),
+  deleteThread: assistant.deleteThread(),
+  getThread: assistant.getThread(),
   transform: query([HttpTransformArgs], HttpResponse, (args) => {
+    return {
+      ...args.response,
+      headers: [],
+    };
+  }),
+  threadTransform: query([HttpTransformArgs], HttpResponse, (args) => {
     return {
       ...args.response,
       headers: [],

@@ -1,7 +1,11 @@
 service: () -> {
+    deleteThread: (text) -> (variant {Ok:text; Err:record {error:record {message:text}}});
+    getThread: (text) -> (variant {Ok:record {id:text; object:text; metadata:record {}; created_at:nat64}; Err:record {error:record {message:text}}}) query;
     getUserAssistants: (text) -> (variant {Ok:vec record {id:text; model:text; tools:vec text; object:text; metadata:record {}; name:text; description:null; created_at:int64; instructions:text; file_ids:vec text}; Err:record {error:record {message:text}}}) query;
     getUsername: (text) -> (variant {Ok:text; Err:record {error:record {message:text}}}) query;
     saveAssistant: (text, text) -> (variant {Ok:record {id:text; model:text; tools:vec text; object:text; metadata:record {}; name:text; description:null; created_at:int64; instructions:text; file_ids:vec text}; Err:record {error:record {message:text}}});
+    saveThread: (text, text) -> (variant {Ok:record {id:text; object:text; metadata:record {}; created_at:nat64}; Err:record {error:record {message:text}}});
+    threadTransform: (record {context:vec nat8; response:record {status:nat; body:vec nat8; headers:vec record {value:text; name:text}}}) -> (record {status:nat; body:vec nat8; headers:vec record {value:text; name:text}}) query;
     transform: (record {context:vec nat8; response:record {status:nat; body:vec nat8; headers:vec record {value:text; name:text}}}) -> (record {status:nat; body:vec nat8; headers:vec record {value:text; name:text}}) query;
     updateUsername: (text, text) -> (variant {Ok:text; Err:record {error:record {message:text}}});
 }

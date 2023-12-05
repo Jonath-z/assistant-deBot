@@ -2,9 +2,12 @@ import React from "react";
 import { saveAssistant } from "../../utils/assistant";
 import "./saveAssistant.css";
 import toast from "react-hot-toast";
+import { useAssistant } from "../../context/assistantProvider";
 
 const SaveAssistant = ({ onClose }) => {
   const [assistantId, setAssistantId] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+  const { setAssistant } = useAssistant();
 
   const onAssistantIdChange = (event) => {
     setAssistantId(event.target.value);
@@ -16,7 +19,20 @@ const SaveAssistant = ({ onClose }) => {
       toast.error("Please enter assistant id");
       return;
     }
-    await saveAssistant(assistantId, window.auth.principalText);
+    try {
+      setSaving(true);
+      const assistant = await saveAssistant(
+        assistantId,
+        window.auth.principalText
+      );
+      setAssistant(assistant);
+      console.log(assistant);
+      onClose();
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -28,18 +44,18 @@ const SaveAssistant = ({ onClose }) => {
           placeholder="Assistant id (ass_sojrlkejiIO9xxsd)"
           onChange={onAssistantIdChange}
         />
-        <div>
+        <div className="assitant__button-container">
           <button
-            onClick={() => onClose}
-            className="save-assistant__content-container__submit-button"
+            onClick={onClose}
+            className="save-assistant__content-container__cancel-button"
           >
-            Save Canister
+            Cancel
           </button>
           <button
             onClick={onAssistantIdSubmit}
             className="save-assistant__content-container__submit-button"
           >
-            Save Canister
+            {saving ? "Validating..." : "Save Canister"}
           </button>
         </div>
       </div>

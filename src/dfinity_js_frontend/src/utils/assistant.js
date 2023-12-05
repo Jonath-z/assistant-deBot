@@ -10,7 +10,6 @@ export const saveAssistant = async (assistantId, userIdentity) => {
       throw data.Err;
     }
 
-    console.log(data.Ok);
     return data.Ok;
   } catch (error) {
     console.error(error);
@@ -27,7 +26,6 @@ export const getMyAssistant = async (userIdentity) => {
       throw data.Err;
     }
 
-    console.log(data.Ok);
     return data.Ok;
   } catch (error) {
     console.error(error);
@@ -61,6 +59,52 @@ export const getUsername = async (userIdentity) => {
     }
 
     console.log(data.Ok);
+    return data.Ok;
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || error.error.message);
+  }
+};
+
+export const saveThread = async (userIdentity, assistantId) => {
+  try {
+    console.log({ userIdentity, assistantId });
+    const data = await window.canister.assistant.saveThread(
+      userIdentity,
+      assistantId
+    );
+    if (data.Err) {
+      throw data.Err;
+    }
+
+    return data.Ok;
+  } catch (error) {
+    console.log(error);
+    toast.error(error.message || error.error.message);
+  }
+};
+
+export const getThread = async (userIdentity) => {
+  try {
+    const data = await window.canister.assistant.getThread(userIdentity);
+    if (data.Err) {
+      throw data.Err;
+    }
+
+    return data.Ok;
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || error.error.message);
+  }
+};
+
+export const deleteThread = async (userIdentity) => {
+  try {
+    const data = await window.canister.assistant.deleteThread(userIdentity);
+    if (data.Err) {
+      throw data.Err;
+    }
+
     return data.Ok;
   } catch (error) {
     console.error(error);

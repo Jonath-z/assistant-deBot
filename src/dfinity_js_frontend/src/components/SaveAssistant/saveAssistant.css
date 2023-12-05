@@ -19,6 +19,13 @@
   gap: 10px;
 }
 
+.assitant__button-container {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  width: 100%;
+}
+
 .save-assistant__content-container__input {
   padding: 10px;
   width: 100%;
@@ -28,11 +35,23 @@
   min-width: 300px;
 }
 
+.save-assistant__content-container__submit-button,
+.save-assistant__content-container__cancel-button {
+  cursor: pointer;
+}
+
 .save-assistant__content-container__submit-button {
   padding: 10px;
   border: none;
   background: #00b0ff;
   color: white;
+  border-radius: 5px;
+  width: 100%;
+}
+
+.save-assistant__content-container__cancel-button {
+  background-color: white;
+  border: 1px solid #00b0ff;
   border-radius: 5px;
   width: 100%;
 }

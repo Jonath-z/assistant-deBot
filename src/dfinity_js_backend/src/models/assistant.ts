@@ -1,4 +1,4 @@
-import { Null, Opt, Record, Vec, int64, text } from "azle";
+import { Null, Opt, Record, Vec, int64, nat, nat64, text } from "azle";
 
 export const CreateAssistantResponseBody = Record({
   id: text,
@@ -11,4 +11,16 @@ export const CreateAssistantResponseBody = Record({
   tools: Vec(text),
   file_ids: Vec(text),
   metadata: Record({}),
+});
+
+export const Thread = Record({
+  id: text,
+  object: text,
+  created_at: nat64,
+  metadata: Record({}),
+});
+
+export const CreateThead = Record({
+  assistantId: text,
+  thread: Thread,
 });

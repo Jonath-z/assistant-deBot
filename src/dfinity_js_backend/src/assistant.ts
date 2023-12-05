@@ -1,29 +1,32 @@
-import { managementCanister } from "azle/canisters/management";
 import {
   update,
   text,
-  ic,
   Vec,
   Ok,
   Err,
   Result,
-  Some,
-  Principal,
   StableBTreeMap,
   nat16,
-  None,
   query,
+  bool,
 } from "azle";
 import { ErrorResponse } from "./models/error";
-import { ASSISTANT_ENDPOINT } from "./utils/constants";
-import { CreateAssistantResponseBody } from "./models/assistant";
+import { ASSISTANT_ENDPOINT, THREAD_ENDPOINT } from "./utils/constants";
+import {
+  CreateAssistantResponseBody,
+  CreateThead,
+  Thread,
+} from "./models/assistant";
 import { OPEN_AI_API_KEY } from "../../../credential";
+import ICPFetch from "./utils/ICPFetch";
 
 const assistantStorage = StableBTreeMap(
   text,
   Vec(CreateAssistantResponseBody),
   1
 );
+
+const threadStorage = StableBTreeMap(text, CreateThead, 4);
 
 class Assistant {
   private saveUserAssistant(
@@ -33,79 +36,36 @@ class Assistant {
     assistantStorage.insert(userIdentity, [assistant]);
   }
 
-  private fromatCreateAssistantResponse(
-    body: ArrayBufferLike,
-    status: nat16
-  ): typeof CreateAssistantResponseBody {
-    const JSONResponse = JSON.parse(Buffer.from(body).toString("utf-8"));
-
-    if (status !== 200) {
-      return JSONResponse;
-    }
-    return {
-      ...JSONResponse,
-      tools: JSONResponse.tools.map((tool: any) => tool.type),
-    };
-  }
-
-  /**
-   * save user assistant function
-   * @date 11/29/2023 - 11:38:18 AM
-   *
-   * @param {string} assistantId
-   * @param {string} userIdentity
-   * @returns {*}
-   */
   saveAssistant() {
     return update(
       [text, text],
       Result(CreateAssistantResponseBody, ErrorResponse),
       async (assistantId, userIdentity) => {
-        const response = await ic.call(managementCanister.http_request, {
-          args: [
-            {
-              transform: Some({
-                function: [ic.id(), "transform"] as [Principal, string],
-                context: Uint8Array.from([]),
-              }),
-              url: `${ASSISTANT_ENDPOINT}/${assistantId.trim()}`,
-              max_response_bytes: Some(2_000n),
-              method: {
-                get: null,
-              },
-              body: None,
-              headers: [
-                {
-                  name: "OpenAI-Beta",
-                  value: "assistants=v1",
-                },
-                {
-                  name: "Authorization",
-                  value: `Bearer ${OPEN_AI_API_KEY}`,
-                },
-                {
-                  name: "content-type",
-                  value: "application/json",
-                },
-              ],
+        const { data, error } = await ICPFetch(
+          `${ASSISTANT_ENDPOINT}/${assistantId.trim()}`,
+          {
+            method: "GET",
+            transform: "transform",
+            headers: {
+              "OpenAI-Beta": "assistants=v1",
+              Authorization: `Bearer ${OPEN_AI_API_KEY}`,
+              "content-type": "application/json",
             },
-          ],
-          cycles: 50_000_000n,
-        });
-
-        const formattedResponse = this.fromatCreateAssistantResponse(
-          response.body.buffer,
-          Number(response.status)
+          }
         );
 
-        if (Number(response.status) !== 200) {
+        if (error.message) {
           return Err({
             error: {
-              message: (formattedResponse as unknown as typeof ErrorResponse)
-                .error.message,
+              message: error.message,
             },
           });
         }
+
+        const formattedResponse = {
+          ...data,
+          tools: data.tools.map((tool: any) => tool.type),
+        };
 
         this.saveUserAssistant(userIdentity, formattedResponse);
         return Ok(formattedResponse);
@@ -130,6 +90,98 @@ class Assistant {
         return Ok(assistants.Some);
       }
     );
+  }
+
+  saveThread() {
+    return update(
+      [text, text],
+      Result(Thread, ErrorResponse),
+      async (userIdentity, assistantId) => {
+        if (!userIdentity) {
+          return Err({
+            error: { message: "userIdentity and thread can not be empty" },
+          });
+        }
+        // Support one thread for now, can add multiple threads support
+        const hasASavedThread = this.hasASavedThread(userIdentity);
+        if (hasASavedThread) {
+          const thread = threadStorage.get(userIdentity.trim());
+          return Ok(thread.Some.thread);
+        }
+
+        const { data, error } = await ICPFetch(THREAD_ENDPOINT, {
+          method: "POST",
+          transform: "threadTransform",
+          headers: {
+            "OpenAI-Beta": "assistants=v1",
+            Authorization: `Bearer ${OPEN_AI_API_KEY}`,
+            "content-type": "application/json",
+          },
+        });
+
+        if (error.message) {
+          return Err({
+            error: { message: error.message },
+          });
+        }
+
+        const threadToSave: typeof CreateThead = {
+          assistantId,
+          thread: data,
+        };
+
+        threadStorage.insert(userIdentity, threadToSave);
+        return Ok(threadToSave.thread);
+      }
+    );
+  }
+
+  getThread() {
+    return query(
+      [text],
+      Result(Thread, ErrorResponse),
+      async (userIdentity) => {
+        if (!userIdentity) {
+          return Err({ error: { message: "userIdentity can not be empty" } });
+        }
+        const thread = threadStorage.get(userIdentity);
+        if ("None" in thread) {
+          return Err({
+            error: { message: `No thread found for ${userIdentity}` },
+          });
+        }
+        return Ok(thread.Some.thread);
+      }
+    );
+  }
+
+  deleteThread() {
+    return update([text], Result(text, ErrorResponse), async (userIdentity) => {
+      if (!userIdentity) {
+        return Err({
+          error: { message: "userIdentity can not be empty" },
+        });
+      }
+
+      const threadToDelete = threadStorage.get(userIdentity);
+      if ("None" in threadToDelete) {
+        return Err({
+          error: { message: `No thread found for ${userIdentity}` },
+        });
+      }
+
+      threadStorage.remove(userIdentity);
+
+      return Ok("Deleted");
+    });
+  }
+
+  hasASavedThread(userIdentity: string) {
+    const thread = threadStorage.get(userIdentity);
+    if ("None" in thread) {
+      return false;
+    }
+    return true;
   }
 }
 
