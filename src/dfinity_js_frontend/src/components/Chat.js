@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import useApi from "../hooks/useApi";
 import Loading from "./Loading";
 import { useEffect } from "react";
 import { login, logout } from "../utils/auth";
@@ -12,10 +11,12 @@ import {
   getAllThreadMessages,
   runTheAssistantOnTheThread,
 } from "../utils/chat";
+import { getUsername } from "../utils/assistant";
+import { useUser } from "../context/userProvider";
 
 export default function Chat() {
   const [question, setQuestion] = useState("");
-  // const { loading, chatCompletion, chatMessage, setChatMessage } = useApi();
+  const { username } = useUser();
   const [chatMessage, setChatMessage] = useState([]);
   const [loading, setLoading] = useState(false);
   const [assistantModalOpened, setAssistantIdModalOpened] = useState(false);
@@ -80,7 +81,9 @@ export default function Chat() {
             className="auth-button auth-button__hover"
             onClick={() => (window.auth.isAuthenticated ? logout() : login())}
           >
-            {window.auth.isAuthenticated ? "Log out" : "Login"}
+            {window.auth.isAuthenticated
+              ? `Log out ${username ? `: ${username}` : ""}`
+              : "Login"}
           </button>
           {window.auth.isAuthenticated && (
             <button

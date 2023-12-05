@@ -3,6 +3,7 @@ import { saveAssistant } from "../../utils/assistant";
 import "./saveAssistant.css";
 import toast from "react-hot-toast";
 import { useAssistant } from "../../context/assistantProvider";
+import UpdateUsername from "../UpdateUsername";
 
 const SaveAssistant = ({ onClose }) => {
   const [assistantId, setAssistantId] = React.useState("");
@@ -38,25 +39,35 @@ const SaveAssistant = ({ onClose }) => {
   return (
     <div className="save-assistant-container">
       <div className="save-assistant__content-container">
-        <input
-          className="save-assistant__content-container__input"
-          type="text"
-          placeholder="Assistant id (ass_sojrlkejiIO9xxsd)"
-          onChange={onAssistantIdChange}
-        />
-        <div className="assitant__button-container">
-          <button
-            onClick={onClose}
-            className="save-assistant__content-container__cancel-button"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={onAssistantIdSubmit}
-            className="save-assistant__content-container__submit-button"
-          >
-            {saving ? "Validating..." : "Save Canister"}
-          </button>
+        <UpdateUsername onClose={onClose} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+          }}
+          className="save-assistant__content-container__"
+        >
+          <input
+            className="save-assistant__content-container__input"
+            type="text"
+            placeholder="Assistant id (ass_sojrlkejiIO9xxsd)"
+            onChange={onAssistantIdChange}
+          />
+          <div className="assitant__button-container">
+            <button
+              onClick={onClose}
+              className="save-assistant__content-container__cancel-button"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onAssistantIdSubmit}
+              className="save-assistant__content-container__submit-button"
+            >
+              {saving ? "Validating..." : "Save Canister"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

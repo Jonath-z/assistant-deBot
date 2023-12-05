@@ -3,6 +3,7 @@
   position: fixed;
   height: 100dvh;
   display: flex;
+  gap: 10px;
   justify-content: center;
   align-items: center;
   z-index: 999;
@@ -14,25 +15,24 @@
 .save-assistant__content-container {
   display: flex;
   flex-direction: column;
-  justify-items: center;
-  align-items: center;
+  max-width: 320px;
   gap: 10px;
+  width: 100%;
 }
 
 .assitant__button-container {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   gap: 18px;
   width: 100%;
 }
 
 .save-assistant__content-container__input {
   padding: 10px;
-  width: 100%;
   outline: none;
   border: 1px solid #00b0ff;
   border-radius: 5px;
-  min-width: 300px;
 }
 
 .save-assistant__content-container__submit-button,
