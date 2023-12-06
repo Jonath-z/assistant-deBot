@@ -12,20 +12,20 @@ De-assistant is a decentralized AI assistant chatbot built on the Internet Compu
 
 ### Credentials
 
-Create a **`credential.js`** file in the root directory and set your OpenAI API key as follows:
+Create a **`credential.js`** file in the root directory and set your OpenAI API and the assitant Id key as follows:
 
 ```javascript
 export const OPEN_AI_API_KEY = "YOUR_OPEN_AI_API_KEY";
+export const ASSISTANT_ID = "ASSISTANT_ID";
 ```
 
+Refer to **`credential.example.js`**
 Note: This file is ignored by default; please ensure it is excluded from version control to prevent accidental exposure of your API key.
 
 After setting up the frontend credentials, ensure that you have the **`dfx`** command-line tool installed on your computer. Check its version with the following command:
 
 ```bash
-
 dfx --version
-
 ```
 
 If you don't have it installed, follow the instructions in the [ICP SDK installation guide](https://internetcomputer.org/docs/current/developer-docs/setup/install#installing-the-ic-sdk-1), making sure to set up version **`0.15.*`**.
@@ -38,7 +38,6 @@ To install project dependencies, run the following command:
 
 ```bash
 npm install
-
 ```
 
 ## **Run the App Locally**

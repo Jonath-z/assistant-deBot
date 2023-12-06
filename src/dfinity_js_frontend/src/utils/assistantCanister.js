@@ -1,32 +1,11 @@
 import toast from "react-hot-toast";
+import { retreiveAssistantFromOpenai } from "./chat";
 
-export const saveAssistant = async (assistantId, userIdentity) => {
+export const getMyAssistant = async () => {
   try {
-    const data = await window.canister.assistant.saveAssistant(
-      assistantId,
-      userIdentity
-    );
-    if (data.Err) {
-      throw data.Err;
-    }
-
-    return data.Ok;
-  } catch (error) {
-    console.error(error);
-    toast.error(error.message || error.error.message);
-  }
-};
-
-export const getMyAssistant = async (userIdentity) => {
-  try {
-    const data = await window.canister.assistant.getUserAssistants(
-      userIdentity
-    );
-    if (data.Err) {
-      throw data.Err;
-    }
-
-    return data.Ok;
+    const data = await window.canister.assistant.getAssistant();
+    const assistant = retreiveAssistantFromOpenai(data.Ok);
+    return assistant;
   } catch (error) {
     console.log(error);
     toast.error(error.message || error.error.message);
@@ -62,15 +41,14 @@ export const getUsername = async (userIdentity) => {
     return data.Ok;
   } catch (error) {
     console.log(error);
-    toast.error(error.message || error.error.message);
   }
 };
 
-export const saveThread = async (userIdentity, assistantId) => {
+export const saveThread = async (userIdentity, thread) => {
   try {
     const data = await window.canister.assistant.saveThread(
       userIdentity,
-      assistantId
+      thread
     );
     if (data.Err) {
       throw data.Err;
@@ -105,6 +83,20 @@ export const deleteThread = async (userIdentity) => {
     }
 
     return data.Ok;
+  } catch (error) {
+    console.error(error);
+    toast.error(error.message || error.error.message);
+  }
+};
+
+export const hasASavedThread = async (userIdentity) => {
+  try {
+    const data = await window.canister.assistant.hasASavedThread(userIdentity);
+    if (data.Err) {
+      throw data.Err;
+    }
+
+    return data;
   } catch (error) {
     console.error(error);
     toast.error(error.message || error.error.message);

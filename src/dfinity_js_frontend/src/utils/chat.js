@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import Openai from "openai";
 import { OPEN_AI_API_KEY } from "../../../../credential";
+import { hasASavedThread, saveThread, getThread } from "./assistantCanister";
 
 // NOTE: This is only for testing purposes. The API should not be exposed in a real production app
 const openai = new Openai({
@@ -16,6 +17,24 @@ export const runTheAssistantOnTheThread = async (threadId, assistantId) => {
     return run.id;
   } catch (e) {
     console.log(e);
+  }
+};
+
+export const createThread = async (userIdentity) => {
+  console.log(userIdentity);
+  try {
+    let thread = null;
+    if (await hasASavedThread(userIdentity)) {
+      thread = await getThread(userIdentity);
+      console.log(thread);
+      return thread;
+    }
+    thread = await openai.beta.threads.create();
+    await saveThread(userIdentity, thread);
+    return thread;
+  } catch (e) {
+    console.log(e);
+    toast.error(e.message || e.error.message);
   }
 };
 
@@ -64,4 +83,9 @@ export const analyseRunsStepsDone = async (threadId, runId) => {
     await new Promise((resolve) => setTimeout(resolve, 3000));
     return await analyseRunsStepsDone(threadId, runId);
   }
+};
+
+export const retreiveAssistantFromOpenai = async (assistantid) => {
+  const assistant = await openai.beta.assistants.retrieve(assistantid);
+  return assistant;
 };

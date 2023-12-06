@@ -3,7 +3,7 @@ import { OPEN_AI_API_KEY } from "../../../../credential";
 import {
   saveThread,
   deleteThread as deleteThreadFromCanister,
-} from "./assistant";
+} from "./assistantCanister";
 
 const API_BASE_URL = "https://api.openai.com/v1";
 

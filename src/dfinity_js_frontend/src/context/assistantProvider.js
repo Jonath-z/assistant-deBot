@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import {
-  getMyAssistant,
-  getThread,
-  saveThread as initThread,
-} from "../utils/assistant";
+import { getMyAssistant } from "../utils/assistantCanister";
+import { createThread } from "../utils/chat";
 
 const AssistantContext = createContext();
 export const useAssistant = () => useContext(AssistantContext);
@@ -14,16 +11,17 @@ const AssistantProvider = ({ children }) => {
 
   const getAssistant = async () => {
     try {
-      const data = await getMyAssistant(window.auth.principalText);
-      setAssistant(data[0]);
+      const data = await getMyAssistant();
+      console.log(data);
+      setAssistant(data);
     } catch (e) {
       console.log(e);
     }
   };
 
-  const saveThread = async (assistantId) => {
+  const saveThread = async () => {
     try {
-      const data = await initThread(window.auth.principalText, assistantId);
+      const data = await createThread(window.auth.principalText);
       setThread(data);
     } catch (e) {
       console.log(e);
@@ -42,7 +40,7 @@ const AssistantProvider = ({ children }) => {
       window.auth.isAuthenticated &&
       assistant?.id
     ) {
-      saveThread(assistant.id);
+      saveThread();
     }
   }, [window.auth.principalText, assistant?.id]);
 

@@ -11,7 +11,6 @@ import {
   getAllThreadMessages,
   runTheAssistantOnTheThread,
 } from "../utils/chat";
-import { getUsername } from "../utils/assistant";
 import { useUser } from "../context/userProvider";
 
 export default function Chat() {
@@ -53,7 +52,7 @@ export default function Chat() {
     if (!question) return;
 
     const messageToSend = { content: question, role: "user" };
-    setChatMessage((prev) => [...prev, messageToSend].reverse());
+    setChatMessage((prev) => [messageToSend, ...prev]);
     setLoading(true);
     await createMessage(thread.id, messageToSend);
     setQuestion("");
@@ -82,7 +81,7 @@ export default function Chat() {
             onClick={() => (window.auth.isAuthenticated ? logout() : login())}
           >
             {window.auth.isAuthenticated
-              ? `Log out ${username ? `: ${username}` : ""}`
+              ? `Log out from ${assistant?.name ?? ""}`
               : "Login"}
           </button>
           {window.auth.isAuthenticated && (
@@ -90,7 +89,7 @@ export default function Chat() {
               onClick={() => setAssistantIdModalOpened(true)}
               className="auth-button auth-button__hover"
             >
-              {assistant?.name ?? "Add Assistant"}
+              {username ?? "Update username"}
             </button>
           )}
         </div>

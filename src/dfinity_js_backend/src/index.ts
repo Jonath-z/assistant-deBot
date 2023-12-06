@@ -1,16 +1,19 @@
-import { query, Canister } from "azle";
+import { query, Canister, init, Opt, text, None, Some } from "azle";
 import { HttpResponse, HttpTransformArgs } from "azle/canisters/management";
 import assistant from "./assistant";
 import user from "./user";
+import { ASSISTANT_ID } from "../../../credential";
+
+let assistantId: string = ASSISTANT_ID ?? "";
 
 export default Canister({
-  saveAssistant: assistant.saveAssistant(),
-  getUserAssistants: assistant.getUserAssistants(),
+  getAssistant: assistant.getAssistant(assistantId),
   updateUsername: user.updateUsername(),
   getUsername: user.getUsername(),
   saveThread: assistant.saveThread(),
   deleteThread: assistant.deleteThread(),
   getThread: assistant.getThread(),
+  hasASavedThread: assistant.hasASavedThread(),
   transform: query([HttpTransformArgs], HttpResponse, (args) => {
     return {
       ...args.response,
