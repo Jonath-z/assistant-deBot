@@ -1,5 +1,4 @@
-import { query, Canister, init, Opt, text, None, Some } from "azle";
-import { HttpResponse, HttpTransformArgs } from "azle/canisters/management";
+import { Canister } from "azle";
 import assistant from "./assistant";
 import user from "./user";
 import { ASSISTANT_ID } from "../../../credential";
