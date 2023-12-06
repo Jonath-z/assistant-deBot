@@ -14,16 +14,4 @@ export default Canister({
   deleteThread: assistant.deleteThread(),
   getThread: assistant.getThread(),
   hasASavedThread: assistant.hasASavedThread(),
-  transform: query([HttpTransformArgs], HttpResponse, (args) => {
-    return {
-      ...args.response,
-      headers: [],
-    };
-  }),
-  threadTransform: query([HttpTransformArgs], HttpResponse, (args) => {
-    return {
-      ...args.response,
-      headers: [],
-    };
-  }),
 });
